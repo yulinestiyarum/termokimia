@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Maya Kimia – Termokimia</title>
+<style>
+/* Offline font fallbacks */
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important; }
+.logo-text, .ct, .h-title, .obs-ttl, .tp-ttl, .sb-ttl, .qtext { font-family: 'Space Grotesk', 'Segoe UI', Arial, sans-serif !important; }
+code, .snum, .sv, .load-sub, .load-percent, .qnum, .qcounter, .sep span, .sim-tip-val { font-family: 'JetBrains Mono', 'Courier New', monospace !important; }
+</style>
+<style>
+:root{
+  --bg:#f0f4f8;--surf:#ffffff;--surf2:#f8fafc;
+  --border:#dde3ec;--border2:#c5cfe0;
+  --acc:#dc2626;--acc2:#ef4444;--acc3:#b91c1c;
+  --acc-cold:#2563eb;--acc-cold2:#3b82f6;
+  --text:#1e293b;--text2:#475569;--text3:#94a3b8;
+  --yellow:#d97706;--red:#dc2626;--green:#059669;
+  --h:56px;
+  --fbase:14px;
+}
+@media (max-width:768px){:root{--fbase:13px;--h:46px;}}
+@media (min-width:1200px){:root{--fbase:15px;}}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 10% 0%,rgba(220,38,38,0.05) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 50% at 90% 100%,rgba(37,99,235,0.05) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(148,163,184,0.08) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(148,163,184,0.08) 40px);
+}
+/* HEADER */
+header{
+  position:relative;z-index:10;height:var(--h);flex-shrink:0;
+  background:linear-gradient(135deg,#0f172a,#7f1d1d);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,0.12);
+  display:flex;align-items:center;padding:0 14px;gap:12px;
+  box-shadow:0 2px 10px rgba(15,23,42,0.45);
+}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.logo-icon{width:35px;height:35px;border-radius:6px;background:#ffffff;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.logo-text{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:#ffffff;line-height:1.1;}
+.logo-sub{font-size:9.5px;color:rgba(255,255,255,0.75);}
+nav{display:flex;gap:2px;flex:1;overflow-x:auto;}
+nav::-webkit-scrollbar{display:none;}
+.nb{position:relative;background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;font-family:'Inter',sans-serif;font-size:clamp(12px,1.3vw,14px);font-weight:500;padding:0 13px;height:var(--h);white-space:nowrap;transition:color .2s;}
+.nb::after{content:'';position:absolute;bottom:0;left:10px;right:10px;height:2px;background:#fca5a5;transform:scaleX(0);transition:transform .2s;border-radius:2px 2px 0 0;}
+.nb:hover{color:rgba(255,255,255,0.95);}
+.nb.active{color:#fff;}
+.nb.active::after{transform:scaleX(1);}
+#menuToggle{display:none;background:none;border:none;cursor:pointer;padding:6px;color:#fff;flex-shrink:0;touch-action:manipulation;}
+#menuToggle svg{display:block;}
+@media(max-width:640px){
+  header{flex-wrap:nowrap;padding:0 10px;}
+  .logo-text{font-size:16px;}
+  .logo-sub{display:none;}
+  #menuToggle{display:flex;align-items:center;justify-content:center;margin-left:auto;}
+  nav{display:none;flex-direction:column;position:fixed;top:var(--h);right:0;left:0;z-index:999;
+    background:linear-gradient(180deg,#0f172a,#7f1d1d);
+    border-bottom:1px solid rgba(255,255,255,.15);
+    box-shadow:0 8px 24px rgba(0,0,0,.35);overflow:visible;gap:0;flex:none;}
+  nav.open{display:flex;}
+  .nb{height:52px;width:100%;text-align:left;padding:0 18px;border-bottom:1px solid rgba(255,255,255,.07);font-size:14px;display:flex;align-items:center;gap:10px;}
+  .nb::after{display:none;}
+  .nb.active{background:rgba(255,255,255,.08);}
+}
+#app{position:relative;z-index:1;flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.page{display:none;flex:1;overflow:hidden;}
+.page.active{display:flex;flex-direction:column;}
+@keyframes fu{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+.page.active{animation:fu .22s ease;}
+.scroll{flex:1;overflow-y:auto;padding:10px 14px 14px;}
+.scroll::-webkit-scrollbar{width:4px;}
+.scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+/* HERO */
+.hero{background:linear-gradient(135deg,#0f172a,#991b1b);border:none;border-radius:9px;padding:10px 16px;margin-bottom:8px;display:flex;align-items:center;gap:20px;position:relative;overflow:hidden;flex-shrink:0;box-shadow:0 4px 18px rgba(220,38,38,.2);}
+.hero::after{content:'🔥';position:absolute;right:12px;top:-8px;font-size:60px;opacity:.08;pointer-events:none;}
+.h-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;color:#fca5a5;text-transform:uppercase;margin-bottom:2px;}
+.h-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(13px,2vw,18px);font-weight:700;color:#fff;line-height:1.2;}
+.h-title span{color:#fecaca;}
+.h-desc{font-size:11px;color:#fecaca;line-height:1.5;max-width:480px;}
+/* CARDS */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:7px;transition:border-color .2s,box-shadow .2s;box-shadow:0 1px 3px rgba(30,41,59,0.06);}
+.card:hover{border-color:var(--border2);box-shadow:0 3px 10px rgba(30,41,59,0.09);}
+.ch{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.ci{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.ci.b{background:rgba(220,38,38,.1);}
+.ci.y{background:rgba(217,119,6,.1);}
+.ci.g{background:rgba(5,150,105,.1);}
+.ci.r{background:rgba(37,99,235,.1);}
+.ci.p{background:rgba(124,58,237,.1);}
+.ct{font-family:'Space Grotesk',sans-serif;font-size:clamp(13px,1.5vw,15px);font-weight:700;color:var(--acc3);}
+.card p{font-size:clamp(12px,1.3vw,14px);line-height:1.7;color:var(--text2);margin-bottom:6px;}
+.card p:last-child{margin-bottom:0;}
+.card h4{font-size:clamp(10px,1.1vw,12px);font-weight:600;color:var(--acc);letter-spacing:.08em;text-transform:uppercase;margin:10px 0 5px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+#page-teori .scroll{overflow:hidden;display:flex;flex-direction:column;}
+#page-teori .card p{font-size:clamp(11px,1.1vw,13px);line-height:1.55;margin-bottom:4px;}
+#page-teori .card h4{margin:6px 0 3px;}
+#page-teori .two-col{gap:5px;}
+#page-teori .card{margin-bottom:5px;padding:9px 12px;}
+#page-alatbahan .scroll{overflow:hidden;display:flex;flex-direction:column;}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;margin-top:5px;}
+.fi{background:var(--surf2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;}
+.fi strong{display:block;font-size:clamp(11px,1.2vw,13px);color:var(--acc3);margin-bottom:3px;}
+.fi span{font-size:clamp(11px,1.2vw,13px);color:var(--text2);line-height:1.5;}
+.olist{list-style:none;}
+.olist li{display:flex;align-items:flex-start;gap:7px;font-size:clamp(12px,1.3vw,14px);color:var(--text2);line-height:1.6;padding:4px 0;border-bottom:1px solid var(--border);}
+.olist li:last-child{border-bottom:none;}
+.olist li::before{content:'›';color:var(--acc);font-weight:700;font-size:15px;margin-top:-1px;}
+.chips{display:flex;gap:5px;margin:6px 0;flex-wrap:wrap;}
+.chip{border-radius:5px;padding:3px 8px;font-size:clamp(11px,1.2vw,13px);font-weight:500;}
+.chip-r{background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);color:#b91c1c;}
+.chip-b{background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);color:#1d4ed8;}
+.chip-g{background:rgba(5,150,105,.08);border:1px solid rgba(5,150,105,.2);color:#047857;}
+.chip-y{background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.2);color:#92400e;}
+/* PROSEDUR */
+.steps{display:flex;flex-direction:column;gap:5px;}
+.step{display:flex;gap:10px;align-items:flex-start;background:var(--surf2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;transition:border-color .17s;}
+.step:hover{border-color:var(--acc2);background:#fff5f5;}
+.snum{min-width:20px;height:20px;border-radius:50%;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.25);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--acc);flex-shrink:0;}
+.step p{font-size:clamp(12px,1.3vw,14px);color:var(--text2);line-height:1.6;margin:0;}
+.notebox{background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:8px 12px;margin-top:7px;}
+.notebox .nt{font-size:9.5px;font-weight:600;color:var(--yellow);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+.notebox p{font-size:clamp(12px,1.2vw,13px);color:#92400e;line-height:1.6;margin:0;}
+.sep{display:flex;align-items:center;gap:8px;margin:8px 0 5px;}
+.sep span{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--acc);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;font-weight:600;}
+.sep::before,.sep::after{content:'';flex:1;height:1px;background:var(--border);}
+/* DRAG DROP */
+.drag-card{
+  background:#fff;border:1.5px solid var(--border);border-radius:10px;
+  padding:10px 8px;text-align:center;cursor:grab;
+  transition:transform .15s, box-shadow .15s, border-color .15s, opacity .2s;
+  user-select:none;position:relative;min-height:80px;
+  touch-action:none;-webkit-tap-highlight-color:transparent;
+}
+.drag-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(30,41,59,.12);border-color:var(--border2);}
+.drag-card:active{cursor:grabbing;transform:scale(.96);}
+.drag-card.alat{background:#fff7ed;border-color:#fed7aa;}
+.drag-card.alat:hover{border-color:#f97316;}
+.drag-card.bahan{background:#fff0f0;border-color:#fecaca;}
+.drag-card.bahan:hover{border-color:#f87171;}
+.drag-card.dragging{opacity:.3;transform:scale(.95);filter:grayscale(.5);}
+.drag-card.placed{opacity:.45;cursor:not-allowed;filter:grayscale(.4);}
+.drag-icon{height:44px;display:flex;align-items:center;justify-content:center;margin-bottom:5px;line-height:1;font-size:32px;}
+.drag-name{font-size:11px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:2px;}
+.drag-sub{font-size:9.5px;color:var(--text3);}
+.drag-card.touch-grabbing{transform:scale(1.06);box-shadow:0 8px 24px rgba(220,38,38,.22);border-color:var(--acc2);z-index:10;}
+.drop-zone{border:2px dashed var(--border2);border-radius:9px;padding:8px;display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start;transition:background .2s, border-color .2s;position:relative;touch-action:none;}
+.drop-zone.drag-over-ok{background:#fff5f5;border-color:#dc2626;}
+.drop-zone.bahan-zone.drag-over-ok{background:#fff0f0;border-color:#ef4444;}
+.drop-zone.drag-over-wrong{background:#fff1f2;border-color:#f87171;}
+.drop-hint{width:100%;text-align:center;font-size:11.5px;color:var(--text3);padding:16px 0;pointer-events:none;}
+.drop-card{background:#fff;border:1.5px solid #fca5a5;border-radius:8px;padding:7px 9px;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--text);position:relative;}
+.drop-card.bahan-card{border-color:#fecaca;}
+.drop-card.wrong-card{border-color:#fca5a5;background:#fff1f2;color:#991b1b;}
+.drop-card-icon{font-size:16px;flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+.drop-card-remove{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0 2px;line-height:1;transition:color .15s;}
+.drop-card-remove:hover{color:#dc2626;}
+@keyframes shakeWrong{0%{transform:translateX(0);}15%{transform:translateX(-8px);}30%{transform:translateX(8px);}45%{transform:translateX(-6px);}60%{transform:translateX(6px);}75%{transform:translateX(-3px);}90%{transform:translateX(3px);}100%{transform:translateX(0);}}
+@keyframes bounceRight{0%{transform:scale(1);}30%{transform:scale(1.12);}55%{transform:scale(.95);}75%{transform:scale(1.05);}100%{transform:scale(1);}}
+.anim-correct{animation:bounceRight .4s cubic-bezier(.34,1.56,.64,1);}
+.anim-wrong{animation:shakeWrong .5s ease;}
+/* DISKUSI */
+.disc-area{width:100%;border:1px solid var(--border);border-radius:7px;padding:9px 11px;font-family:'Inter',sans-serif;font-size:12px;color:var(--text);background:var(--surf2);resize:vertical;outline:none;transition:border-color .17s;line-height:1.6;margin-top:6px;}
+.disc-area:focus{border-color:var(--acc);box-shadow:0 0 0 2px rgba(220,38,38,.1);}
+/* LOADING */
+#loadScreen{
+  position:fixed;inset:0;z-index:99999;
+  background:linear-gradient(135deg,#0f172a 0%,#7f1d1d 50%,#dc2626 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;transition:opacity .6s ease;
+}
+#loadScreen.hide{opacity:0;pointer-events:none;}
+.load-logo{font-size:clamp(48px,8vw,72px);margin-bottom:16px;}
+.load-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(18px,2.5vw,28px);font-weight:800;color:#fff;text-align:center;margin-bottom:4px;}
+.load-sub{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.1vw,12px);color:#fca5a5;letter-spacing:.15em;text-transform:uppercase;text-align:center;margin-bottom:28px;}
+.load-bar-wrap{width:clamp(220px,28vw,340px);height:6px;background:rgba(255,255,255,.15);border-radius:6px;overflow:hidden;margin-bottom:8px;}
+.load-bar-slide{height:100%;width:0%;background:linear-gradient(90deg,#f87171,#fca5a5,#ef4444);border-radius:6px;transition:width .1s linear;}
+.load-percent{font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.4vw,15px);color:#fff;font-weight:700;margin-bottom:14px;text-align:center;}
+.load-status{font-size:clamp(11px,1.1vw,12px);color:#fecaca;font-family:'Inter',sans-serif;margin-bottom:32px;min-height:16px;text-align:center;}
+#btnMulaiPraktikum{
+  display:none;background:linear-gradient(135deg,#991b1b,#dc2626);
+  color:#fff;border:none;border-radius:10px;padding:10px 28px;
+  font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1.3vw,14px);font-weight:700;
+  cursor:pointer;letter-spacing:.03em;
+  box-shadow:0 4px 18px rgba(220,38,38,.4);
+  animation:btnPop .4s cubic-bezier(.34,1.56,.64,1) forwards;
+  transition:transform .18s, box-shadow .18s;
+}
+#btnMulaiPraktikum:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 8px 28px rgba(220,38,38,.5);}
+@keyframes btnPop{from{opacity:0;transform:scale(0.7);}to{opacity:1;transform:scale(1);}}
+/* SCORE OVERLAY */
+.score-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(8px);}
+.score-overlay.on{display:flex;}
+.score-box{background:#fff;border:1px solid var(--border);border-radius:14px;padding:32px 44px;text-align:center;box-shadow:0 20px 60px rgba(30,41,59,.18);animation:fu .28s ease;min-width:280px;}
+.score-big{font-family:'Space Grotesk',sans-serif;font-size:68px;font-weight:700;color:var(--acc);line-height:1;}
+.score-pct{font-size:20px;color:var(--text3);margin-top:2px;}
+.score-sub{font-size:12.5px;color:var(--text2);margin:8px 0 4px;}
+.score-grade{font-size:15px;font-weight:600;margin-top:8px;}
+.score-actions{display:flex;gap:8px;justify-content:center;margin-top:18px;}
+.btn-score{padding:8px 20px;border-radius:7px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;border:none;transition:all .17s;}
+.btn-review{background:var(--surf2);border:1px solid var(--border);color:var(--text2);}
+.btn-review:hover{border-color:var(--acc);color:var(--acc);background:#fff5f5;}
+.btn-ulangi{background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff;}
+.btn-ulangi:hover{box-shadow:0 4px 14px rgba(220,38,38,.35);}
+/* QUIZ */
+.quiz-nav-header{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:var(--surf);border:1px solid var(--border);border-radius:9px;margin-bottom:7px;flex-shrink:0;}
+.qprog{display:flex;gap:3px;flex-wrap:wrap;}
+.qprog-dot{width:24px;height:24px;border-radius:5px;border:1px solid var(--border);background:var(--surf2);font-size:9.5px;font-weight:600;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .17s;}
+.qprog-dot.answered{border-color:var(--acc2);color:var(--acc);background:#fff5f5;}
+.qprog-dot.current{background:var(--acc);color:#fff;border-color:var(--acc);}
+.q-card{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:14px;flex:1;display:flex;flex-direction:column;}
+.qnum{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--acc);letter-spacing:.1em;margin-bottom:5px;}
+.qtext{font-size:13px;color:var(--text);line-height:1.55;font-weight:500;margin-bottom:10px;}
+.opts{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.opt{display:flex;align-items:flex-start;gap:8px;background:var(--surf2);border:1px solid var(--border);border-radius:7px;padding:8px 11px;cursor:pointer;transition:all .16s;font-size:12px;color:var(--text2);}
+.opt:hover{border-color:var(--acc2);background:#fff5f5;color:var(--text);}
+.opt input{margin-top:1px;accent-color:var(--acc);cursor:pointer;}
+.opt.sel{border-color:var(--acc);background:#fff5f5;color:var(--acc3);}
+.opt.correct{background:#f0fdf4;border-color:#86efac;color:#166534;}
+.opt.wrong{background:#fff1f2;border-color:#f87171;color:#b91c1c;}
+.qfb{margin-top:8px;padding:7px 10px;border-radius:6px;font-size:11.5px;display:none;}
+.qfb.on{display:block;}
+.qfb.ok{background:#f0fdf4;color:#166534;border:1px solid #86efac;}
+.qfb.bad{background:#fff1f2;color:#b91c1c;border:1px solid #fecdd3;}
+.quiz-foot{display:flex;align-items:center;gap:7px;padding-top:7px;flex-shrink:0;}
+.btn-qnav{padding:6px 14px;border-radius:6px;font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .17s;border:none;}
+.btn-prev{background:var(--surf2);border:1px solid var(--border);color:var(--text2);}
+.btn-prev:hover{border-color:var(--acc);color:var(--acc);background:#fff5f5;}
+.btn-next{background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff;box-shadow:0 2px 8px rgba(220,38,38,.25);}
+.btn-next:hover{box-shadow:0 4px 14px rgba(220,38,38,.35);}
+.btn-submit-q{background:linear-gradient(135deg,#7f1d1d,#dc2626);color:#fff;}
+.btn-reset-q{background:var(--surf2);border:1px solid var(--border);color:var(--text2);}
+.btn-reset-q:hover{border-color:var(--acc);color:var(--acc);background:#fff5f5;}
+.qcounter{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text3);}
+/* Celebration */
+.score-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(8px);}
+.score-overlay.on{display:flex;}
+/* Popup */
+#dragPopup{display:none;position:fixed;inset:0;z-index:10000;align-items:center;justify-content:center;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);}
+#dragPopupBox{background:#fff;border-radius:18px;padding:32px 36px;text-align:center;max-width:300px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.25);transform:scale(.7);opacity:0;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .25s;}
+/* Celebration Overlay */
+#celebOverlay{display:none;position:fixed;inset:0;z-index:20000;align-items:center;justify-content:center;pointer-events:none;}
+#confettiCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+#celebStars{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+#celebBox{position:relative;background:linear-gradient(145deg,#1a0000,#2d0a0a,#7f1d1d);border:1px solid rgba(252,165,165,0.25);border-radius:28px;padding:44px 52px 40px;text-align:center;max-width:420px;width:92%;box-shadow:0 30px 100px rgba(0,0,0,.7),0 0 60px rgba(220,38,38,.3),inset 0 1px 0 rgba(255,255,255,.1);transform:scale(.4) translateY(80px);opacity:0;transition:transform .6s cubic-bezier(.34,1.56,.64,1),opacity .4s;pointer-events:auto;}
+@keyframes celebBounce{0%,100%{transform:translateY(0) scale(1);}40%{transform:translateY(-14px) scale(1.08);}70%{transform:translateY(-4px) scale(.97);}}
+@keyframes celebRingPulse{0%,100%{opacity:.3;}50%{opacity:.55;}}
+@keyframes starFloat{0%{opacity:0;transform:translateY(0) scale(0);}15%{opacity:1;}85%{opacity:.8;}100%{opacity:0;transform:translateY(-120px) scale(1.2) rotate(180deg);}}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* Simulasi styles */
+.sim-wrap{display:grid;grid-template-columns:220px 1fr;gap:8px;flex:1;min-height:0;}
+.ctrl-panel{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
+.ctrl-panel h3{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:var(--acc3);}
+.cg label{display:block;font-size:9.5px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+select{width:100%;background:#fff;border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 26px 6px 8px;font-family:'Inter',sans-serif;font-size:11.5px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23dc2626' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;transition:border-color .17s;}
+select:focus{border-color:var(--acc);}
+.btn{width:100%;border:none;border-radius:6px;padding:8px;font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .17s;}
+.btn-start{background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff;box-shadow:0 2px 8px rgba(220,38,38,.3);}
+.btn-start:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(220,38,38,.35);}
+.btn-start:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-stop{background:#fff1f2;border:1px solid #fecdd3;color:var(--red);}
+.btn-stop:hover{background:#ffe4e6;}
+.btn-reset{background:var(--surf2);border:1px solid var(--border);color:var(--text2);}
+.btn-reset:hover{border-color:var(--acc);color:var(--acc);background:#fff5f5;}
+.statsrow{display:flex;gap:6px;margin-top:6px;}
+.sbox{flex:1;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:6px;text-align:center;}
+.sv{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;color:var(--acc);display:block;}
+.sl{font-size:9.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+
+@media(max-width:640px){
+  #page-alatbahan .scroll{padding:8px 10px 12px;overflow-y:auto;}
+  #page-alatbahan .scroll > div[style*="grid-template-columns:1fr 1fr"]{display:flex !important;flex-direction:column !important;height:auto !important;gap:10px !important;}
+  #page-alatbahan .card:first-child{max-height:46vh;}
+  #sourceAlat{grid-template-columns:repeat(auto-fill,minmax(90px,1fr)) !important;gap:8px !important;}
+  .drag-card{min-height:90px;padding:12px 8px;}
+  .drag-icon{height:48px;font-size:36px;}
+  .drag-name{font-size:12px;}
+  .drag-sub{font-size:10px;}
+  .drop-zone{min-height:72px;}
+  .drop-hint{font-size:12px;padding:20px 0;}
+  .sim-wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loadScreen">
+  <div class="load-logo">🔥</div>
+  <div class="load-title">Lab Maya Kimia</div>
+  <div class="load-sub">Reaksi Eksotermik &amp; Endotermik</div>
+  <div class="load-bar-wrap"><div class="load-bar-slide" id="loadBar"></div></div>
+  <div class="load-percent" id="loadPercent">0%</div>
+  <div class="load-status" id="loadStatus">Memuat laboratorium virtual…</div>
+  <button id="btnMulaiPraktikum" onclick="startPraktikum()">Mulai Praktikum</button>
+</div>
+
+<script>
+(function(){
+  const bar=document.getElementById('loadBar');
+  const pct=document.getElementById('loadPercent');
+  const status=document.getElementById('loadStatus');
+  let current=0;
+  const total=2500;
+  const step=20;
+  const inc=100/(total/step);
+  const msgs=['Menyiapkan reagen kimia…','Mengkalibrasi termometer…','Menyiapkan gelas kimia…','Laboratorium siap digunakan!'];
+  let mIdx=0;
+  const iv=setInterval(()=>{
+    current=Math.min(100,current+inc);
+    const v=Math.floor(current);
+    bar.style.width=v+'%';
+    pct.textContent=v+'%';
+    if(v>25&&mIdx===0){status.textContent=msgs[1];mIdx=1;}
+    if(v>55&&mIdx===1){status.textContent=msgs[2];mIdx=2;}
+    if(current>=100){
+      clearInterval(iv);
+      pct.textContent='100%';
+      status.textContent='✅ '+msgs[3];
+      document.getElementById('btnMulaiPraktikum').style.display='block';
+    }
+  },step);
+})();
+function startPraktikum(){
+  const ls=document.getElementById('loadScreen');
+  ls.classList.add('hide');
+  setTimeout(()=>{ls.style.display='none';},650);
+}
+</script>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🔥</div>
+    <div>
+      <div class="logo-text">Lab Maya Kimia</div>
+      <div class="logo-sub">Termokimia – Reaksi Eksotermik &amp; Endotermik</div>
+    </div>
+  </div>
+  <button id="menuToggle" onclick="toggleNav()" aria-label="Menu">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+  <nav id="mainNav" style="margin-left:0;justify-content:flex-end;">
+    <button class="nb active" onclick="show('teori',this);closeNav()">📚 Teori</button>
+    <button class="nb" onclick="show('alatbahan',this);closeNav()">🔬 Alat &amp; Bahan</button>
+    <button class="nb" onclick="show('prosedur',this);closeNav()">📋 Prosedur</button>
+    <button class="nb" onclick="show('simulasi',this);closeNav()">⚗️ Simulasi</button>
+    <button class="nb" onclick="show('diskusi',this);closeNav()">💬 Diskusi</button>
+  </nav>
+</header>
+
+<div id="app">
+
+<!-- ===== TEORI ===== -->
+<div id="page-teori" class="page active">
+  <div class="scroll" style="overflow-y:auto;padding:10px 14px 14px;">
+    <div class="two-col" style="margin-bottom:5px;">
+      <div class="card">
+        <div class="ch"><div class="ci b">🎯</div><div class="ct">Tujuan Percobaan</div></div>
+        <ul class="olist">
+          <li>Mengamati secara langsung perbedaan antara reaksi eksotermik dan endotermik</li>
+          <li>Mengukur dan mencatat perubahan suhu sebelum, selama, dan sesudah reaksi</li>
+          <li>Menentukan tanda perubahan entalpi (ΔH) berdasarkan data percobaan</li>
+          <li>Menggambarkan diagram tingkat energi reaksi eksotermik dan endotermik</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ci g">🏆</div><div class="ct">Hasil Belajar</div></div>
+        <ul class="olist">
+          <li>Membedakan reaksi eksotermik dan endotermik dari perubahan suhu</li>
+          <li>Menentukan sistem dan lingkungan pada setiap reaksi</li>
+          <li>Menganalisis arah perpindahan kalor dan tanda ΔH</li>
+          <li>Terampil menggunakan alat lab dengan prosedur K3 yang benar</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:5px;">
+      <div class="ch"><div class="ci r">📖</div><div class="ct">Sistem dan Lingkungan</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:7px;padding:10px;">
+          <div style="font-size:11px;font-weight:700;color:#991b1b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;">⚗️ Sistem</div>
+          <p style="font-size:12px;color:var(--text2);line-height:1.6;margin:0;">Sesuatu yang menjadi <strong>pusat perhatian</strong> — dalam praktikum ini: <strong style="color:#991b1b">zat-zat yang direaksikan</strong> di dalam gelas kimia atau tabung reaksi.</p>
+        </div>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:7px;padding:10px;">
+          <div style="font-size:11px;font-weight:700;color:#1e3a8a;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;">🌍 Lingkungan</div>
+          <p style="font-size:12px;color:var(--text2);line-height:1.6;margin:0;">Segala sesuatu di <strong>luar sistem</strong> — dalam praktikum ini: <strong style="color:#1e3a8a">gelas kimia, termometer, dan udara sekitar</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="ch"><div class="ci b">🔥</div><div class="ct">Reaksi Eksotermik</div></div>
+        <p>Reaksi yang <strong style="color:#991b1b">melepaskan kalor</strong> dari sistem ke lingkungan. Indikator: suhu campuran <strong>meningkat</strong> (T<sub>akhir</sub> &gt; T<sub>awal</sub>).</p>
+        <div style="background:#fff5f5;border-left:3px solid #dc2626;padding:7px 11px;border-radius:0 6px 6px 0;margin:6px 0;">
+          <div style="font-size:10px;font-weight:700;color:#991b1b;margin-bottom:2px;">PERUBAHAN ENTALPI</div>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#7f1d1d;margin:0;">ΔH &lt; 0 (negatif)</p>
+          <p style="font-size:11px;color:var(--text2);margin:3px 0 0;">H<sub>produk</sub> &lt; H<sub>reaktan</sub></p>
+        </div>
+        <div class="chips">
+          <span class="chip chip-r">NaOH + H₂O</span>
+          <span class="chip chip-r">Mg + HCl</span>
+          <span class="chip chip-r">CaO + H₂O</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ci r">❄️</div><div class="ct">Reaksi Endotermik</div></div>
+        <p>Reaksi yang <strong style="color:#1d4ed8">menyerap kalor</strong> dari lingkungan ke sistem. Indikator: suhu campuran <strong>menurun</strong> (T<sub>akhir</sub> &lt; T<sub>awal</sub>).</p>
+        <div style="background:#eff6ff;border-left:3px solid #2563eb;padding:7px 11px;border-radius:0 6px 6px 0;margin:6px 0;">
+          <div style="font-size:10px;font-weight:700;color:#1e3a8a;margin-bottom:2px;">PERUBAHAN ENTALPI</div>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#1e3a8a;margin:0;">ΔH &gt; 0 (positif)</p>
+          <p style="font-size:11px;color:var(--text2);margin:3px 0 0;">H<sub>produk</sub> &gt; H<sub>reaktan</sub></p>
+        </div>
+        <div class="chips">
+          <span class="chip chip-b">Urea + H₂O</span>
+          <span class="chip chip-b">Asam Sitrat + NaHCO₃</span>
+          <span class="chip chip-b">Ba(OH)₂ + NH₄Cl</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:5px;margin-bottom:0;">
+      <div class="ch"><div class="ci g">📊</div><div class="ct">Diagram Tingkat Energi</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#991b1b;text-align:center;margin-bottom:6px;">EKSOTERMIK (ΔH &lt; 0)</div>
+          <svg viewBox="0 0 200 140" style="width:100%;max-height:120px;background:#fff5f5;border-radius:7px;border:1px solid #fecaca;">
+            <line x1="20" y1="10" x2="20" y2="130" stroke="#ccc" stroke-width="1.5"/>
+            <line x1="20" y1="130" x2="190" y2="130" stroke="#ccc" stroke-width="1.5"/>
+            <text x="8" y="135" font-size="8" fill="#999" font-family="monospace">E</text>
+            <rect x="30" y="40" width="50" height="6" rx="3" fill="#dc2626"/>
+            <text x="35" y="35" font-size="7" fill="#991b1b" font-family="monospace">Reaktan</text>
+            <rect x="130" y="80" width="50" height="6" rx="3" fill="#dc2626"/>
+            <text x="135" y="75" font-size="7" fill="#991b1b" font-family="monospace">Produk</text>
+            <path d="M 80 43 Q 105 20 130 83" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="4,2"/>
+            <line x1="158" y1="43" x2="158" y2="83" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,2"/>
+            <text x="162" y="65" font-size="8" fill="#991b1b" font-weight="bold">ΔH&lt;0</text>
+            <text x="148" y="43" font-size="7" fill="#dc2626">↓</text>
+          </svg>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#1e3a8a;text-align:center;margin-bottom:6px;">ENDOTERMIK (ΔH &gt; 0)</div>
+          <svg viewBox="0 0 200 140" style="width:100%;max-height:120px;background:#eff6ff;border-radius:7px;border:1px solid #bfdbfe;">
+            <line x1="20" y1="10" x2="20" y2="130" stroke="#ccc" stroke-width="1.5"/>
+            <line x1="20" y1="130" x2="190" y2="130" stroke="#ccc" stroke-width="1.5"/>
+            <text x="8" y="135" font-size="8" fill="#999" font-family="monospace">E</text>
+            <rect x="30" y="85" width="50" height="6" rx="3" fill="#2563eb"/>
+            <text x="35" y="80" font-size="7" fill="#1e3a8a" font-family="monospace">Reaktan</text>
+            <rect x="130" y="40" width="50" height="6" rx="3" fill="#2563eb"/>
+            <text x="135" y="35" font-size="7" fill="#1e3a8a" font-family="monospace">Produk</text>
+            <path d="M 80 88 Q 105 110 130 43" stroke="#2563eb" stroke-width="2" fill="none" stroke-dasharray="4,2"/>
+            <line x1="158" y1="43" x2="158" y2="88" stroke="#2563eb" stroke-width="1" stroke-dasharray="3,2"/>
+            <text x="162" y="68" font-size="8" fill="#1e3a8a" font-weight="bold">ΔH&gt;0</text>
+            <text x="148" y="50" font-size="7" fill="#2563eb">↑</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ALAT DAN BAHAN ===== -->
+<div id="page-alatbahan" class="page">
+  <div class="scroll" style="padding:10px 14px 14px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;height:100%;min-height:0;">
+      <!-- KIRI -->
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="ch" style="flex-shrink:0;">
+          <div class="ci b">🔍</div>
+          <div class="ct">Daftar Alat &amp; Bahan</div>
+        </div>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:8px;flex-shrink:0;">Drag atau <strong style="color:var(--acc3)">tekan &amp; geser</strong> item ke <strong style="color:var(--acc3)">Meja Percobaan</strong> di sebelah kanan.</p>
+        <div id="sourceAlat" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:7px;flex:1;overflow-y:auto;">
+          <!-- ALAT -->
+          <div class="drag-card alat" draggable="true" data-id="gelas" data-type="alat" data-name="6 Gelas Kimia 100mL" data-sub="Wadah reaksi"><div class="drag-icon">🧪</div><div class="drag-name">6 Gelas Kimia</div><div class="drag-sub">100 mL</div></div>
+          <div class="drag-card alat" draggable="true" data-id="tabung" data-type="alat" data-name="Tabung Reaksi + Rak" data-sub="Percobaan 2"><div class="drag-icon">🔬</div><div class="drag-name">Tabung Reaksi</div><div class="drag-sub">+ Rak</div></div>
+          <div class="drag-card alat" draggable="true" data-id="ukur" data-type="alat" data-name="Gelas Ukur 50mL" data-sub="Mengukur volume"><div class="drag-icon">📏</div><div class="drag-name">Gelas Ukur</div><div class="drag-sub">50 mL</div></div>
+          <div class="drag-card alat" draggable="true" data-id="spatula" data-type="alat" data-name="Spatula" data-sub="Mengambil padatan"><div class="drag-icon">🥄</div><div class="drag-name">Spatula</div><div class="drag-sub">Mengambil padatan</div></div>
+          <div class="drag-card alat" draggable="true" data-id="pipet" data-type="alat" data-name="Pipet Tetes" data-sub="Meneteskan cairan"><div class="drag-icon">💉</div><div class="drag-name">Pipet Tetes</div><div class="drag-sub">Meneteskan cairan</div></div>
+          <div class="drag-card alat" draggable="true" data-id="pengaduk" data-type="alat" data-name="Pengaduk Kaca" data-sub="Mengaduk larutan"><div class="drag-icon">🪄</div><div class="drag-name">Pengaduk Kaca</div><div class="drag-sub">Mengaduk larutan</div></div>
+          <div class="drag-card alat" draggable="true" data-id="termometer" data-type="alat" data-name="Termometer" data-sub="Mengukur suhu"><div class="drag-icon">🌡️</div><div class="drag-name">Termometer</div><div class="drag-sub">Mengukur suhu</div></div>
+          <!-- BAHAN -->
+          <div class="drag-card bahan" draggable="true" data-id="naoh" data-type="bahan" data-name="Padatan NaOH" data-sub="Percobaan 1"><div class="drag-icon">🟤</div><div class="drag-name">Padatan NaOH</div><div class="drag-sub">Percobaan 1</div></div>
+          <div class="drag-card bahan" draggable="true" data-id="mg" data-type="bahan" data-name="Pita Magnesium" data-sub="Percobaan 2"><div class="drag-icon">🔩</div><div class="drag-name">Pita Magnesium</div><div class="drag-sub">Percobaan 2</div></div>
+          <div class="drag-card bahan" draggable="true" data-id="hcl" data-type="bahan" data-name="Larutan HCl 1M" data-sub="Percobaan 2"><div class="drag-icon">🟡</div><div class="drag-name">Larutan HCl 1M</div><div class="drag-sub">Percobaan 2</div></div>
+          <div class="drag-card bahan" draggable="true" data-id="cao" data-type="bahan" data-name="Serbuk CaO" data-sub="Percobaan 3"><div class="drag-icon">⬜</div><div class="drag-name">Serbuk CaO</div><div class="drag-sub">Percobaan 3</div></div>
+          <div class="drag-card bahan" draggable="true" data-id="urea" data-type="bahan" data-name="Padatan Urea" data-sub="Percobaan 4"><div class="drag-icon">🔵</div><div class="drag-name">Padatan Urea</div><div class="drag-sub">Percobaan 4</div></div>
+          <div class="drag-card bahan" draggable="true" data-id="sitrat" data-type="bahan" data-name="Asam Sitrat" data-sub="Percobaan 5"><div class="drag-icon">🍋</div><div class="drag-name">Asam Sitrat</div><div class="drag-sub">Percobaan 5</div></div>
+          <div class="drag-card bahan" draggable="true" data-id="soda" data-type="bahan" data-name="Soda Kue (NaHCO₃)" data-sub="Percobaan 5"><div class="drag-icon">🧂</div><div class="drag-name">Soda Kue</div><div class="drag-sub">NaHCO₃</div></div>
+          <div class="drag-card bahan" draggable="true" data-id="ba" data-type="bahan" data-name="Ba(OH)₂·8H₂O" data-sub="Percobaan 6"><div class="drag-icon">🟣</div><div class="drag-name">Ba(OH)₂·8H₂O</div><div class="drag-sub">Percobaan 6</div></div>
+          <div class="drag-card bahan" draggable="true" data-id="nh4cl" data-type="bahan" data-name="NH₄Cl" data-sub="Percobaan 6"><div class="drag-icon">⚪</div><div class="drag-name">NH₄Cl</div><div class="drag-sub">Percobaan 6</div></div>
+          <div class="drag-card bahan" draggable="true" data-id="aquades" data-type="bahan" data-name="Aquades" data-sub="Semua percobaan"><div class="drag-icon">💧</div><div class="drag-name">Aquades</div><div class="drag-sub">Semua percobaan</div></div>
+        </div>
+      </div>
+      <!-- KANAN -->
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="ch" style="flex-shrink:0;">
+          <div class="ci g">🧫</div>
+          <div class="ct">Meja Percobaan</div>
+        </div>
+        <div style="font-size:9px;font-weight:700;color:var(--acc);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;flex-shrink:0;">⚙️ Alat Percobaan</div>
+        <div id="dropAlat" class="drop-zone" data-accept="alat" style="flex:1;min-height:0;margin-bottom:10px;">
+          <div class="drop-hint">← Drag alat ke sini</div>
+        </div>
+        <div style="font-size:9px;font-weight:700;color:#d97706;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;flex-shrink:0;">🧪 Bahan Percobaan</div>
+        <div id="dropBahan" class="drop-zone bahan-zone" data-accept="bahan" style="flex:1;min-height:0;">
+          <div class="drop-hint">← Drag bahan ke sini</div>
+        </div>
+        <button onclick="resetMeja()" style="margin-top:10px;flex-shrink:0;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .17s;" onmouseover="this.style.borderColor='var(--acc)';this.style.color='var(--acc)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">↺ Reset Meja</button>
+        <div id="catatanMeja" style="display:none;margin-top:10px;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:8px 12px;flex-shrink:0;">
+          <div style="font-size:9px;font-weight:700;color:#d97706;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">💡 Catatan Penggunaan</div>
+          <p id="catatanText" style="font-size:11.5px;color:#92400e;line-height:1.6;margin:0;"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popup Modal -->
+<div id="dragPopup" style="display:none;position:fixed;inset:0;z-index:10000;align-items:center;justify-content:center;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);">
+  <div id="dragPopupBox" style="background:#fff;border-radius:18px;padding:32px 36px;text-align:center;max-width:300px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.25);transform:scale(.7);opacity:0;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .25s;">
+    <div id="dragPopupIcon" style="font-size:56px;line-height:1;margin-bottom:12px;"></div>
+    <div id="dragPopupTitle" style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;"></div>
+    <div id="dragPopupMsg" style="font-size:13px;color:#64748b;line-height:1.5;margin-bottom:20px;"></div>
+    <button onclick="closeDragPopup()" style="background:linear-gradient(135deg,var(--acc),var(--acc3));color:#fff;border:none;border-radius:9px;padding:9px 28px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
+  </div>
+</div>
+
+<!-- Celebration Overlay -->
+<div id="celebOverlay" style="display:none;position:fixed;inset:0;z-index:20000;align-items:center;justify-content:center;pointer-events:none;">
+  <canvas id="confettiCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+  <div id="celebStars" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;"></div>
+  <div id="celebBox" style="position:relative;background:linear-gradient(145deg,#1a0000,#2d0a0a,#7f1d1d);border:1px solid rgba(252,165,165,0.25);border-radius:28px;padding:44px 52px 40px;text-align:center;max-width:420px;width:92%;box-shadow:0 30px 100px rgba(0,0,0,.7),0 0 60px rgba(220,38,38,.3),inset 0 1px 0 rgba(255,255,255,.1);transform:scale(.4) translateY(80px);opacity:0;transition:transform .6s cubic-bezier(.34,1.56,.64,1),opacity .4s;pointer-events:auto;">
+    <div style="position:absolute;inset:-2px;border-radius:30px;background:linear-gradient(145deg,#dc2626,#f97316,#fbbf24,#dc2626);opacity:.4;z-index:-1;animation:celebRingPulse 2s ease infinite;"></div>
+    <div style="position:relative;display:inline-block;margin-bottom:16px;"><div style="font-size:72px;line-height:1;animation:celebBounce .8s ease infinite;filter:drop-shadow(0 0 20px rgba(251,191,36,.6));">🏆</div></div>
+    <div id="celebBadge" style="display:inline-block;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1a1a1a;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:14px;box-shadow:0 4px 16px rgba(251,191,36,.5);opacity:0;transform:scale(.6);transition:opacity .4s .5s, transform .4s .5s cubic-bezier(.34,1.56,.64,1);">✨ SEMPURNA! ✨</div>
+    <div id="celebTitle" style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:800;color:#fff;margin-bottom:10px;line-height:1.1;opacity:0;transform:translateY(10px);transition:opacity .4s .65s, transform .4s .65s ease-out;">Luar Biasa! 🎉</div>
+    <div id="celebSub" style="font-size:14px;color:#fca5a5;line-height:1.7;margin-bottom:12px;opacity:0;transform:translateY(8px);transition:opacity .4s .8s, transform .4s .8s ease-out;">Semua alat dan bahan telah ditempatkan<br>dengan <strong style="color:#fde68a;">tepat</strong> di meja percobaan!</div>
+    <div id="celebStats" style="display:flex;gap:10px;justify-content:center;margin-bottom:26px;opacity:0;transition:opacity .4s .95s;">
+      <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 16px;"><div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#fde68a;">7</div><div style="font-size:10px;color:#94a3b8;letter-spacing:.05em;">ALAT</div></div>
+      <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 16px;"><div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#fca5a5;">10</div><div style="font-size:10px;color:#94a3b8;letter-spacing:.05em;">BAHAN</div></div>
+      <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 16px;"><div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#fb923c;">17</div><div style="font-size:10px;color:#94a3b8;letter-spacing:.05em;">TOTAL</div></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button onclick="closeCelebration()" style="background:linear-gradient(135deg,#dc2626,#f97316);color:#fff;border:none;border-radius:12px;padding:11px 30px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Lanjutkan ➜</button>
+      <button onclick="closeCelebration();resetMeja();" style="background:rgba(255,255,255,.1);color:#e2e8f0;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:11px 30px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">↺ Coba Lagi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PROSEDUR ===== -->
+<div id="page-prosedur" class="page">
+  <div style="flex:1;overflow:hidden;padding:6px 10px;display:flex;flex-direction:column;">
+    <div class="card" style="margin-bottom:0;flex:1;display:flex;flex-direction:column;overflow:hidden;padding:10px 12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--border);">
+        <div class="ch" style="margin-bottom:0;"><div class="ci b">📋</div><div class="ct">Prosedur Percobaan</div></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <span style="background:#fff5f5;border:1px solid #fecaca;border-radius:5px;padding:3px 9px;font-size:10.5px;color:#991b1b;font-weight:600;">🔥 3 Eksotermik</span>
+          <span style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:5px;padding:3px 9px;font-size:10.5px;color:#1e3a8a;font-weight:600;">❄️ 3 Endotermik</span>
+        </div>
+      </div>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;min-height:0;overflow:hidden;">
+        <!-- KIRI: Alur Timeline -->
+        <div id="flowchartArea" style="overflow-y:auto;overflow-x:hidden;padding:4px 8px 4px 4px;border-right:1px solid var(--border);"></div>
+        <!-- KANAN: Panel Info -->
+        <div style="overflow:hidden;display:flex;flex-direction:column;gap:8px;">
+          <div style="flex:1;background:#fff8f8;border:1px solid #fecdc3;border-radius:9px;padding:10px 14px;display:flex;flex-direction:column;min-height:0;">
+            <div style="font-size:10px;font-weight:700;color:#991b1b;letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px;flex-shrink:0;">⚠️ Perhatikan</div>
+            <div style="display:flex;flex-direction:column;flex:1;justify-content:space-evenly;">
+              <div style="display:flex;gap:9px;padding:4px 0;border-bottom:1px solid #fecdd344;font-size:12px;color:var(--text2);align-items:flex-start;"><span style="color:#991b1b;flex-shrink:0;">●</span><span>Catat suhu awal sebelum mencampurkan bahan</span></div>
+              <div style="display:flex;gap:9px;padding:4px 0;border-bottom:1px solid #fecdd344;font-size:12px;color:var(--text2);align-items:flex-start;"><span style="color:#991b1b;flex-shrink:0;">●</span><span>Gunakan <strong>gelas ukur</strong> untuk volume cairan yang tepat</span></div>
+              <div style="display:flex;gap:9px;padding:4px 0;font-size:12px;color:var(--text2);align-items:flex-start;"><span style="color:#991b1b;flex-shrink:0;">●</span><span>NaOH dan CaO bersifat korosif — hindari kontak kulit</span></div>
+            </div>
+          </div>
+          <div style="flex:1;background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:10px 14px;display:flex;flex-direction:column;min-height:0;">
+            <div style="font-size:10px;font-weight:700;color:#15803d;letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px;flex-shrink:0;">💡 Membaca Hasil</div>
+            <div style="display:flex;flex-direction:column;flex:1;justify-content:space-evenly;">
+              <div style="display:flex;gap:9px;padding:4px 0;border-bottom:1px solid #86efac44;font-size:12px;color:var(--text2);align-items:center;"><span style="font-size:15px;flex-shrink:0;">🔥</span><span>Suhu naik → <strong style="color:#991b1b">Reaksi Eksotermik</strong> (ΔH &lt; 0)</span></div>
+              <div style="display:flex;gap:9px;padding:4px 0;font-size:12px;color:var(--text2);align-items:center;"><span style="font-size:15px;flex-shrink:0;">❄️</span><span>Suhu turun → <strong style="color:#1d4ed8">Reaksi Endotermik</strong> (ΔH &gt; 0)</span></div>
+            </div>
+          </div>
+          <div style="flex:1.5;background:#eff6ff;border:1px solid #93c5fd;border-radius:9px;padding:10px 14px;display:flex;flex-direction:column;min-height:0;">
+            <div style="font-size:10px;font-weight:700;color:#1e3a8a;letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px;flex-shrink:0;">⚗️ 6 Percobaan</div>
+            <div style="display:flex;flex-direction:column;flex:1;justify-content:space-evenly;">
+              <div style="display:flex;align-items:center;gap:9px;padding:3px 0;border-bottom:1px solid #bfdbfe44;"><span style="background:#fee2e2;color:#991b1b;border-radius:4px;padding:1px 6px;font-weight:700;font-size:10px;flex-shrink:0;">1🔥</span><span style="font-size:11px;color:var(--text2);">Pelarutan NaOH</span></div>
+              <div style="display:flex;align-items:center;gap:9px;padding:3px 0;border-bottom:1px solid #bfdbfe44;"><span style="background:#fee2e2;color:#991b1b;border-radius:4px;padding:1px 6px;font-weight:700;font-size:10px;flex-shrink:0;">2🔥</span><span style="font-size:11px;color:var(--text2);">Reaksi HCl + Mg</span></div>
+              <div style="display:flex;align-items:center;gap:9px;padding:3px 0;border-bottom:1px solid #bfdbfe44;"><span style="background:#fee2e2;color:#991b1b;border-radius:4px;padding:1px 6px;font-weight:700;font-size:10px;flex-shrink:0;">3🔥</span><span style="font-size:11px;color:var(--text2);">Hidrasi CaO</span></div>
+              <div style="display:flex;align-items:center;gap:9px;padding:3px 0;border-bottom:1px solid #bfdbfe44;"><span style="background:#eff6ff;color:#1d4ed8;border-radius:4px;padding:1px 6px;font-weight:700;font-size:10px;flex-shrink:0;">4❄️</span><span style="font-size:11px;color:var(--text2);">Pelarutan Urea</span></div>
+              <div style="display:flex;align-items:center;gap:9px;padding:3px 0;border-bottom:1px solid #bfdbfe44;"><span style="background:#eff6ff;color:#1d4ed8;border-radius:4px;padding:1px 6px;font-weight:700;font-size:10px;flex-shrink:0;">5❄️</span><span style="font-size:11px;color:var(--text2);">Asam Sitrat + NaHCO₃</span></div>
+              <div style="display:flex;align-items:center;gap:9px;padding:3px 0;"><span style="background:#eff6ff;color:#1d4ed8;border-radius:4px;padding:1px 6px;font-weight:700;font-size:10px;flex-shrink:0;">6❄️</span><span style="font-size:11px;color:var(--text2);">Ba(OH)₂ + NH₄Cl</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SIMULASI ===== -->
+<div id="page-simulasi" class="page">
+  <div style="flex:1;overflow:hidden;padding:8px 12px;display:flex;flex-direction:column;gap:6px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.1vw,12px);letter-spacing:.12em;color:var(--acc);text-transform:uppercase;">Simulasi Interaktif</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(16px,2vw,20px);font-weight:700;color:var(--acc3);">Reaksi <span style="color:#ef4444">Eksotermik</span> &amp; <span style="color:#2563eb">Endotermik</span></div>
+      </div>
+      <button onclick="resetSim()" style="background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;" onmouseover="this.style.borderColor='var(--acc)';this.style.color='var(--acc)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">↺ Reset</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:8px;flex:1;min-height:0;">
+      <!-- Control Panel -->
+      <div style="background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:var(--acc3);">Pilih Percobaan</div>
+        <div style="display:flex;flex-direction:column;gap:5px;" id="simBtnGroup">
+          <button class="sim-btn active" data-idx="0" onclick="selectSim(0)">1. Pelarutan NaOH 🔥</button>
+          <button class="sim-btn" data-idx="1" onclick="selectSim(1)">2. HCl + Mg 🔥</button>
+          <button class="sim-btn" data-idx="2" onclick="selectSim(2)">3. CaO + H₂O 🔥</button>
+          <button class="sim-btn" data-idx="3" onclick="selectSim(3)">4. Pelarutan Urea ❄️</button>
+          <button class="sim-btn" data-idx="4" onclick="selectSim(4)">5. Sitrat + NaHCO₃ ❄️</button>
+          <button class="sim-btn" data-idx="5" onclick="selectSim(5)">6. Ba(OH)₂ + NH₄Cl ❄️</button>
+        </div>
+        <div id="simInfo" style="background:var(--surf2);border:1px solid var(--border);border-radius:7px;padding:8px;font-size:10.5px;color:var(--text2);line-height:1.6;"></div>
+        <button id="simStartBtn" onclick="runSim()" style="width:100%;border:none;border-radius:6px;padding:8px;font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff;transition:all .17s;">▶ Jalankan Reaksi</button>
+      </div>
+
+      <!-- Simulation Canvas -->
+      <div style="display:flex;flex-direction:column;gap:7px;overflow:hidden;">
+        <div style="background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:12px;flex:1;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+          <!-- Beaker visualization -->
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;" id="simScene">
+            <div id="simBeaker" style="position:relative;width:120px;height:180px;">
+              <!-- Beaker body -->
+              <svg width="120" height="180" style="position:absolute;top:0;left:0;z-index:2;">
+                <path d="M15 20 L10 170 Q10 178 20 178 L100 178 Q110 178 110 170 L105 20 Z" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linejoin="round"/>
+                <rect x="15" y="10" width="90" height="14" rx="3" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+                <!-- Scale lines -->
+                <line x1="17" y1="60" x2="25" y2="60" stroke="#cbd5e1" stroke-width="1"/>
+                <line x1="17" y1="90" x2="25" y2="90" stroke="#cbd5e1" stroke-width="1"/>
+                <line x1="17" y1="120" x2="25" y2="120" stroke="#cbd5e1" stroke-width="1"/>
+                <line x1="17" y1="150" x2="25" y2="150" stroke="#cbd5e1" stroke-width="1"/>
+              </svg>
+              <!-- Liquid inside -->
+              <div id="simLiquid" style="position:absolute;bottom:2px;left:12px;right:12px;height:80px;border-radius:0 0 8px 8px;background:rgba(147,197,253,0.5);transition:background 1s ease, height 0.5s ease;z-index:1;"></div>
+              <!-- Bubbles container -->
+              <div id="simBubbles" style="position:absolute;bottom:2px;left:12px;right:12px;height:160px;overflow:hidden;z-index:3;pointer-events:none;border-radius:0 0 8px 8px;"></div>
+              <!-- Temperature indicator -->
+              <div id="simTempArrow" style="position:absolute;right:-60px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:22px;">🌡️</div>
+            </div>
+            <!-- Reagent icons -->
+            <div id="simReagents" style="position:absolute;top:10px;left:10px;display:flex;gap:8px;"></div>
+            <!-- Result badge -->
+            <div id="simResult" style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);white-space:nowrap;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;"></div>
+          </div>
+          <!-- Temperature gauge -->
+          <div style="margin-top:8px;flex-shrink:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Suhu Campuran</span>
+              <span id="simTempVal" style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--acc);">-- °C</span>
+            </div>
+            <div style="background:#f1f5f9;border-radius:6px;height:10px;overflow:hidden;position:relative;">
+              <div id="simTempBar" style="position:absolute;left:0;top:0;height:100%;width:50%;background:#94a3b8;border-radius:6px;transition:width 1s ease, background 1s ease;"></div>
+              <div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#cbd5e1;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:2px;">
+              <span style="font-size:9px;color:var(--text3);">0°C</span>
+              <span style="font-size:9px;color:var(--text3);">T awal</span>
+              <span style="font-size:9px;color:var(--text3);">100°C</span>
+            </div>
+          </div>
+        </div>
+        <!-- Observation table -->
+        <div style="background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:8px 12px;flex-shrink:0;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--acc3);margin-bottom:5px;">📊 Tabel Pengamatan</div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:10px;">
+              <thead><tr style="background:linear-gradient(135deg,#991b1b,#dc2626);">
+                <th style="color:#fff;padding:4px 7px;text-align:left;font-size:9px;">Percobaan</th>
+                <th style="color:#fff;padding:4px 7px;text-align:center;">T Awal (°C)</th>
+                <th style="color:#fff;padding:4px 7px;text-align:center;">T Akhir (°C)</th>
+                <th style="color:#fff;padding:4px 7px;text-align:center;">ΔT</th>
+                <th style="color:#fff;padding:4px 7px;text-align:center;">Jenis</th>
+              </tr></thead>
+              <tbody id="simTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DISKUSI ===== -->
+<div id="page-diskusi" class="page">
+  <div style="flex:1;overflow:hidden;padding:8px 12px 8px;display:flex;flex-direction:column;gap:6px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.1vw,12px);letter-spacing:.12em;color:var(--acc);text-transform:uppercase;">Pertanyaan Diskusi</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(16px,2vw,20px);font-weight:700;color:var(--acc3);">Diskusi <span style="color:var(--acc2)">Hasil Percobaan</span></div>
+      </div>
+      <button class="btn-qnav btn-reset-q" onclick="clearDQ()" style="border:1px solid var(--border);font-size:11px;padding:5px 12px;">↺ Hapus Jawaban</button>
+    </div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:6px;min-height:0;">
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;">
+        <div class="ch" style="margin-bottom:4px;"><div class="ci b" style="min-width:22px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;">1</div><div class="ct" style="font-size:clamp(13px,1.4vw,15px);">Percobaan mana saja yang merupakan contoh reaksi eksotermik? Jelaskan alasanmu!</div></div>
+        <textarea class="disc-area" placeholder="Jawaban..." oninput="saveDQ(1,this.value)" style="flex:1;resize:none;margin-top:0;min-height:0;"></textarea>
+      </div>
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;">
+        <div class="ch" style="margin-bottom:4px;"><div class="ci b" style="min-width:22px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;">2</div><div class="ct" style="font-size:clamp(13px,1.4vw,15px);">Percobaan mana saja yang merupakan contoh reaksi endotermik? Jelaskan alasanmu!</div></div>
+        <textarea class="disc-area" placeholder="Jawaban..." oninput="saveDQ(2,this.value)" style="flex:1;resize:none;margin-top:0;min-height:0;"></textarea>
+      </div>
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;">
+        <div class="ch" style="margin-bottom:4px;"><div class="ci b" style="min-width:22px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;">3</div><div class="ct" style="font-size:clamp(13px,1.4vw,15px);">Jelaskan 3 perbedaan reaksi eksotermik dengan endotermik berdasarkan hasil percobaan!</div></div>
+        <textarea class="disc-area" placeholder="Jawaban..." oninput="saveDQ(3,this.value)" style="flex:1;resize:none;margin-top:0;min-height:0;"></textarea>
+      </div>
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;">
+        <div class="ch" style="margin-bottom:4px;"><div class="ci b" style="min-width:22px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;">4</div><div class="ct" style="font-size:clamp(13px,1.4vw,15px);">Buat kesimpulan dari percobaan yang telah kamu lakukan!</div></div>
+        <textarea class="disc-area" placeholder="Jawaban..." oninput="saveDQ(4,this.value)" style="flex:1;resize:none;margin-top:0;min-height:0;"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<style>
+.sim-btn{
+  width:100%;text-align:left;padding:7px 10px;border:1px solid var(--border);border-radius:6px;
+  background:var(--surf2);font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;
+  color:var(--text2);cursor:pointer;transition:all .17s;
+}
+.sim-btn:hover{border-color:var(--acc2);color:var(--acc3);background:#fff5f5;}
+.sim-btn.active{border-color:var(--acc);background:#fff5f5;color:var(--acc3);}
+.bubble-anim{position:absolute;border-radius:50%;background:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.5);animation:bubbleRise linear infinite;}
+@keyframes bubbleRise{0%{transform:translateY(0) translateX(0);opacity:.8;}100%{transform:translateY(-160px) translateX(var(--dx,0px));opacity:0;}}
+</style>
+
+<script>
+// ===== NAV =====
+function toggleNav(){document.getElementById('mainNav').classList.toggle('open');}
+function closeNav(){document.getElementById('mainNav').classList.remove('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('nav')&&!e.target.closest('#menuToggle'))closeNav();});
+function show(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ===== DRAG & DROP (Alat & Bahan) =====
+(function(){
+  const NOTES={
+    gelas:'Siapkan 6 gelas kimia bersih 100 mL, pastikan kering sebelum digunakan.',
+    tabung:'Tabung reaksi diperlukan untuk Percobaan 2 (reaksi HCl + Mg).',
+    ukur:'Gelas ukur digunakan untuk mengukur volume larutan secara akurat (mL).',
+    spatula:'Gunakan spatula untuk mengambil padatan NaOH, CaO, urea, Ba(OH)₂, dan NH₄Cl.',
+    pipet:'Pipet tetes digunakan untuk meneteskan larutan dalam jumlah kecil.',
+    pengaduk:'Pengaduk kaca digunakan untuk mengaduk campuran hingga homogen.',
+    termometer:'Termometer digunakan untuk mengukur suhu awal dan akhir setiap percobaan.',
+    naoh:'NaOH bersifat korosif — gunakan sarung tangan. Pelarutan NaOH melepas kalor.',
+    mg:'Pita Mg sepanjang 2 cm — bersihkan dengan amplas sebelum digunakan.',
+    hcl:'Larutan HCl 1M bersifat asam — hindari kontak dengan kulit dan mata.',
+    cao:'CaO (kapur tohor) sangat reaktif dengan air — gunakan dalam lemari asam.',
+    urea:'Urea larut menyerap kalor — larutan akan terasa dingin saat disentuh.',
+    sitrat:'Asam sitrat digunakan bersama soda kue untuk reaksi endotermik.',
+    soda:'Soda kue (NaHCO₃) bereaksi dengan asam menghasilkan CO₂ dan suhu turun.',
+    ba:'Ba(OH)₂·8H₂O bereaksi kuat dengan NH₄Cl menghasilkan suhu sangat rendah.',
+    nh4cl:'NH₄Cl bersifat asam lemah — campurkan dengan Ba(OH)₂ untuk reaksi endotermik ekstrem.',
+    aquades:'Gunakan aquades (air suling) bebas mineral untuk semua percobaan.'
+  };
+  const CORRECT_ALAT=new Set(['gelas','tabung','ukur','spatula','pipet','pengaduk','termometer']);
+  const CORRECT_BAHAN=new Set(['naoh','mg','hcl','cao','urea','sitrat','soda','ba','nh4cl','aquades']);
+  const ALL_CORRECT=new Set([...CORRECT_ALAT,...CORRECT_BAHAN]);
+
+  let dragId=null,dragType=null,touchClone=null,touchCard=null,touchDragging=false;
+  let touchLongTimer=null,touchStartX=0,touchStartY=0,popupTimer=null;
+
+  function showPopup(icon,title,msg,type){
+    const overlay=document.getElementById('dragPopup'),box=document.getElementById('dragPopupBox');
+    const accent=type==='ok'?'#dc2626':'#dc2626';
+    document.getElementById('dragPopupIcon').textContent=icon;
+    document.getElementById('dragPopupTitle').textContent=title;
+    document.getElementById('dragPopupTitle').style.color=accent;
+    document.getElementById('dragPopupMsg').textContent=msg;
+    overlay.style.display='flex';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{box.style.transform='scale(1)';box.style.opacity='1';}));
+    clearTimeout(popupTimer);
+    popupTimer=setTimeout(closeDragPopup,2800);
+  }
+  window.closeDragPopup=function(){
+    clearTimeout(popupTimer);
+    const overlay=document.getElementById('dragPopup'),box=document.getElementById('dragPopupBox');
+    box.style.transform='scale(.7)';box.style.opacity='0';
+    setTimeout(()=>{overlay.style.display='none';},280);
+  };
+  function highlightZones(type){document.querySelectorAll('.drop-zone').forEach(z=>{z.style.opacity=z.dataset.accept===type?'1':'0.45';});}
+  function clearZoneHighlights(){document.querySelectorAll('.drop-zone').forEach(z=>{z.style.opacity='';z.classList.remove('drag-over-ok','drag-over-wrong');});}
+
+  document.querySelectorAll('.drag-card').forEach(card=>{
+    card.addEventListener('dragstart',e=>{
+      if(card.classList.contains('placed')){e.preventDefault();return;}
+      dragId=card.dataset.id;dragType=card.dataset.type;
+      card.classList.add('dragging');e.dataTransfer.effectAllowed='copy';
+      highlightZones(dragType);
+    });
+    card.addEventListener('dragend',()=>{card.classList.remove('dragging');clearZoneHighlights();});
+    card.addEventListener('touchstart',e=>{
+      if(card.classList.contains('placed'))return;
+      const t=e.touches[0];touchStartX=t.clientX;touchStartY=t.clientY;touchDragging=false;
+      touchLongTimer=setTimeout(()=>{
+        touchDragging=true;touchCard=card;dragId=card.dataset.id;dragType=card.dataset.type;
+        if(navigator.vibrate)navigator.vibrate(30);
+        card.classList.add('touch-grabbing');
+        const rect=card.getBoundingClientRect();
+        touchClone=card.cloneNode(true);
+        touchClone.style.cssText=['position:fixed','z-index:99999','pointer-events:none',`width:${rect.width}px`,`height:${rect.height}px`,`top:${rect.top}px`,`left:${rect.left}px`,'transition:none','box-shadow:0 12px 36px rgba(0,0,0,.35)','transform:scale(1.1)','opacity:.92','border-radius:10px'].join(';');
+        document.body.appendChild(touchClone);
+        card.classList.add('dragging');highlightZones(dragType);
+      },120);
+    },{passive:true});
+    card.addEventListener('touchmove',e=>{
+      const t=e.touches[0],dx=t.clientX-touchStartX,dy=t.clientY-touchStartY;
+      if(!touchDragging){if(Math.abs(dx)>8||Math.abs(dy)>8){clearTimeout(touchLongTimer);}return;}
+      e.preventDefault();
+      if(!touchClone||!touchCard)return;
+      const rect=touchCard.getBoundingClientRect();
+      touchClone.style.top=(t.clientY-rect.height/2)+'px';touchClone.style.left=(t.clientX-rect.width/2)+'px';
+      touchClone.style.display='none';
+      const el=document.elementFromPoint(t.clientX,t.clientY);
+      touchClone.style.display='';
+      document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('drag-over-ok','drag-over-wrong'));
+      const zone=el&&el.closest('.drop-zone');
+      if(zone)zone.classList.add(zone.dataset.accept===dragType?'drag-over-ok':'drag-over-wrong');
+    },{passive:false});
+    card.addEventListener('touchend',e=>{
+      clearTimeout(touchLongTimer);touchLongTimer=null;
+      if(!touchDragging||!touchClone||!touchCard){touchDragging=false;return;}
+      const t=e.changedTouches[0];
+      touchClone.style.display='none';const el=document.elementFromPoint(t.clientX,t.clientY);touchClone.style.display='';
+      const zone=el&&el.closest('.drop-zone');if(zone)drop(zone);
+      touchClone.remove();touchClone=null;touchCard.classList.remove('dragging','touch-grabbing');touchCard=null;
+      clearZoneHighlights();touchDragging=false;dragId=null;dragType=null;
+    });
+    card.addEventListener('touchcancel',()=>{
+      clearTimeout(touchLongTimer);touchLongTimer=null;
+      if(touchClone){touchClone.remove();touchClone=null;}
+      if(touchCard){touchCard.classList.remove('dragging','touch-grabbing');touchCard=null;}
+      clearZoneHighlights();touchDragging=false;dragId=null;dragType=null;
+    });
+  });
+
+  document.querySelectorAll('.drop-zone').forEach(zone=>{
+    zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.toggle('drag-over-ok',zone.dataset.accept===dragType);zone.classList.toggle('drag-over-wrong',zone.dataset.accept!==dragType);});
+    zone.addEventListener('dragleave',()=>zone.classList.remove('drag-over-ok','drag-over-wrong'));
+    zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag-over-ok','drag-over-wrong');drop(zone);});
+  });
+
+  function drop(zone){
+    if(!dragId)return;
+    const src=document.querySelector(`.drag-card[data-id="${dragId}"]`);
+    if(!src||src.classList.contains('placed')){dragId=null;dragType=null;return;}
+    const isCorrect=zone.dataset.accept===dragType;
+    const hint=zone.querySelector('.drop-hint');if(hint)hint.remove();
+    const dc=document.createElement('div');
+    dc.className='drop-card'+(dragType==='bahan'?' bahan-card':'')+(isCorrect?'':' wrong-card')+(isCorrect?' anim-correct':'');
+    dc.dataset.id=dragId;
+    dc.innerHTML=`<span class="drop-card-icon">${src.querySelector('.drag-icon').textContent}</span><span>${src.querySelector('.drag-name').textContent}</span>${!isCorrect?'<span style="margin-left:3px;font-size:11px;">⚠️</span>':''}<button class="drop-card-remove" title="Hapus">&#x2715;</button>`;
+    const zoneId=zone.id;
+    dc.querySelector('.drop-card-remove').addEventListener('click',()=>{
+      dc.remove();src.classList.remove('placed');
+      const z=document.getElementById(zoneId);
+      if(!z.querySelector('.drop-card'))z.innerHTML=`<div class="drop-hint">← Drag ${zoneId==='dropAlat'?'alat':'bahan'} ke sini</div>`;
+      updateCatatan();
+    });
+    zone.appendChild(dc);src.classList.add('placed');
+    if(isCorrect){
+      showPopup('✅','Tepat!',src.querySelector('.drag-name').textContent+' berhasil diletakkan.','ok');
+    } else {
+      const correctLabel=dragType==='alat'?'Alat Percobaan':'Bahan Percobaan';
+      showPopup('⚠️','Penempatan Kurang Tepat!','Item ini seharusnya di area '+correctLabel+'.','wrong');
+    }
+    updateCatatan();dragId=null;dragType=null;
+  }
+
+  function updateCatatan(){
+    const all=[...document.querySelectorAll('.drop-card')].map(d=>d.dataset.id);
+    const box=document.getElementById('catatanMeja'),txt=document.getElementById('catatanText');
+    if(!all.length){box.style.display='none';return;}
+    txt.innerHTML=all.map(id=>NOTES[id]).filter(Boolean).join(' ');
+    box.style.display='block';
+    const correctCards=[...document.querySelectorAll('.drop-card:not(.wrong-card)')].map(d=>d.dataset.id);
+    const wrongCards=[...document.querySelectorAll('.drop-card.wrong-card')];
+    const correctSet=new Set(correctCards);
+    if(wrongCards.length===0&&ALL_CORRECT.size===correctSet.size&&[...ALL_CORRECT].every(id=>correctSet.has(id)))setTimeout(showCelebration,400);
+  }
+
+  let confettiRAF=null;
+  function launchConfetti(){
+    const canvas=document.getElementById('confettiCanvas'),ctx=canvas.getContext('2d');
+    canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+    const colors=['#dc2626','#ef4444','#f87171','#fbbf24','#f59e0b','#f97316','#fb923c','#fecaca','#fff','#fde68a'];
+    const pieces=Array.from({length:200},()=>({x:Math.random()*canvas.width,y:Math.random()*-canvas.height*.6,w:5+Math.random()*12,h:3+Math.random()*6,r:Math.random()*Math.PI*2,dr:(Math.random()-.5)*.18,dy:2+Math.random()*4.5,dx:(Math.random()-.5)*2.5,col:colors[Math.floor(Math.random()*colors.length)],opacity:1,shape:Math.random()>.6?'circle':'rect'}));
+    let startTime=null;
+    function draw(ts){
+      if(!startTime)startTime=ts;const elapsed=ts-startTime;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      pieces.forEach(p=>{p.y+=p.dy;p.x+=p.dx;p.r+=p.dr;if(elapsed>2500)p.opacity=Math.max(0,p.opacity-.015);
+        ctx.save();ctx.globalAlpha=p.opacity;ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.col;
+        if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.w/2,0,Math.PI*2);ctx.fill();}
+        else ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});
+      if(elapsed<5000)confettiRAF=requestAnimationFrame(draw);else ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+    confettiRAF=requestAnimationFrame(draw);
+  }
+
+  function showCelebration(){
+    const overlay=document.getElementById('celebOverlay'),box=document.getElementById('celebBox');
+    overlay.style.display='flex';overlay.style.pointerEvents='auto';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{box.style.transform='scale(1) translateY(0)';box.style.opacity='1';}));
+    setTimeout(()=>{const b=document.getElementById('celebBadge');if(b){b.style.opacity='1';b.style.transform='scale(1)';}},500);
+    setTimeout(()=>{const t=document.getElementById('celebTitle');if(t){t.style.opacity='1';t.style.transform='translateY(0)';}},650);
+    setTimeout(()=>{const s=document.getElementById('celebSub');if(s){s.style.opacity='1';s.style.transform='translateY(0)';}},800);
+    setTimeout(()=>{const st=document.getElementById('celebStats');if(st)st.style.opacity='1';},950);
+    // Stars
+    const container=document.getElementById('celebStars');container.innerHTML='';
+    const emojis=['⭐','🌟','✨','💫','🎊','🎉','🔥','❤️'];
+    for(let i=0;i<22;i++){const s=document.createElement('div');s.textContent=emojis[Math.floor(Math.random()*emojis.length)];const l=5+Math.random()*90,d=Math.random()*2.5,dur=1.8+Math.random()*1.5,sz=14+Math.floor(Math.random()*22);s.style.cssText=`position:absolute;left:${l}%;bottom:${10+Math.random()*60}%;font-size:${sz}px;animation:starFloat ${dur}s ease-out ${d}s both;pointer-events:none;`;container.appendChild(s);}
+    setTimeout(()=>{if(container)container.innerHTML='';},5500);
+    launchConfetti();
+  }
+
+  window.closeCelebration=function(){
+    if(confettiRAF){cancelAnimationFrame(confettiRAF);confettiRAF=null;}
+    const overlay=document.getElementById('celebOverlay'),box=document.getElementById('celebBox');
+    box.style.transform='scale(.5) translateY(60px)';box.style.opacity='0';
+    const canvas=document.getElementById('confettiCanvas');
+    const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+    setTimeout(()=>{overlay.style.display='none';overlay.style.pointerEvents='none';
+      const badge=document.getElementById('celebBadge'),title=document.getElementById('celebTitle'),sub=document.getElementById('celebSub'),stats=document.getElementById('celebStats');
+      if(badge){badge.style.opacity='0';badge.style.transform='scale(.6)';}
+      if(title){title.style.opacity='0';title.style.transform='translateY(10px)';}
+      if(sub){sub.style.opacity='0';sub.style.transform='translateY(8px)';}
+      if(stats)stats.style.opacity='0';},400);
+  };
+
+  window.resetMeja=function(){
+    closeCelebration();
+    document.getElementById('dropAlat').innerHTML='<div class="drop-hint">← Drag alat ke sini</div>';
+    document.getElementById('dropBahan').innerHTML='<div class="drop-hint">← Drag bahan ke sini</div>';
+    document.querySelectorAll('.drag-card').forEach(c=>c.classList.remove('placed'));
+    document.getElementById('catatanMeja').style.display='none';
+  };
+})();
+
+// ===== PROSEDUR - Flowchart =====
+const simSteps=[
+  {icon:'🌡️',text:'<strong>Sebelum setiap percobaan:</strong> ukur suhu awal aquades menggunakan termometer dan <strong>catat datanya</strong>.'},
+  {icon:'🔥',text:'<strong>Percobaan 1</strong> — Tuangkan 20 mL aquades, tambahkan <strong>2 spatula NaOH</strong>, aduk perlahan hingga larut. Amati perubahan suhu.'},
+  {icon:'🔥',text:'<strong>Percobaan 2</strong> — Masukkan 10 mL <strong>HCl 1M</strong> ke tabung reaksi. Masukkan <strong>2 cm pita Mg</strong>. Amati gelembung dan suhu.'},
+  {icon:'🔥',text:'<strong>Percobaan 3</strong> — Tuangkan 20 mL aquades, tambahkan <strong>2 spatula CaO</strong>. Aduk perlahan. Hati-hati: reaksi sangat panas!'},
+  {icon:'❄️',text:'<strong>Percobaan 4</strong> — Tuangkan 20 mL aquades, tambahkan <strong>3 spatula urea</strong>. Aduk hingga larut. Rasakan pendinginan di luar gelas.'},
+  {icon:'❄️',text:'<strong>Percobaan 5</strong> — Tuangkan 20 mL aquades, masukkan <strong>1 spatula asam sitrat + 1 spatula NaHCO₃</strong> bersamaan. Amati gelembung CO₂.'},
+  {icon:'❄️',text:'<strong>Percobaan 6</strong> — Letakkan gelas di atas kayu basah. Masukkan <strong>2 spatula Ba(OH)₂ + 1 spatula NH₄Cl</strong>. Aduk terus — gelas dapat membeku ke kayu!'},
+  {icon:'📊',text:'Catat semua data suhu awal dan akhir. Hitung ΔT = T<sub>akhir</sub> − T<sub>awal</sub>. Klasifikasikan sebagai <strong>eksotermik</strong> atau <strong>endotermik</strong>.'}
+];
+
+function buildFlowchart(data,containerId){
+  const colors=['#dc2626','#ef4444','#dc2626','#2563eb','#2563eb','#2563eb','#1d4ed8','#059669'];
+  const container=document.getElementById(containerId);
+  if(!container)return;container.innerHTML='';
+  const wrapper=document.createElement('div');wrapper.style.cssText='display:flex;flex-direction:column;height:100%;min-height:0;';
+  data.forEach((s,i)=>{
+    const clr=colors[i%colors.length],isLast=i===data.length-1;
+    const rowWrap=document.createElement('div');rowWrap.style.cssText='display:flex;flex-direction:column;align-items:stretch;flex:1;min-height:0;';
+    const node=document.createElement('div');
+    node.style.cssText=`display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid ${clr}33;border-left:3px solid ${clr};border-radius:8px;padding:5px 10px;cursor:pointer;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;box-shadow:0 1px 3px rgba(30,41,59,0.06);user-select:none;flex-shrink:0;`;
+    const badge=document.createElement('div');badge.style.cssText=`min-width:20px;height:20px;border-radius:50%;background:${clr}15;border:1.5px solid ${clr}55;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:${clr};flex-shrink:0;`;badge.textContent=i+1;
+    const iconEl=document.createElement('div');iconEl.style.cssText='font-size:16px;flex-shrink:0;';iconEl.textContent=s.icon;
+    const tp=document.createElement('p');tp.style.cssText='font-size:10.5px;color:var(--text2);margin:0;line-height:1.45;flex:1;min-width:0;';tp.innerHTML=s.text;
+    node.appendChild(badge);node.appendChild(iconEl);node.appendChild(tp);
+    node.addEventListener('click',function(){
+      this.style.transform='scale(1.03)';this.style.background=clr+'08';this.style.boxShadow=`0 4px 12px ${clr}25`;
+      setTimeout(()=>{this.style.transform='';this.style.background='#fff';this.style.boxShadow='0 1px 3px rgba(30,41,59,0.06)';},380);
+    });
+    rowWrap.appendChild(node);
+    if(!isLast){const conn=document.createElement('div');conn.style.cssText='display:flex;align-items:flex-start;flex:1;min-height:4px;padding-left:9px;';const spine=document.createElement('div');spine.style.cssText=`flex:1;border-left:2px dashed ${colors[(i+1)%colors.length]}66;min-height:4px;`;conn.appendChild(spine);rowWrap.appendChild(conn);}
+    wrapper.appendChild(rowWrap);
+  });
+  container.appendChild(wrapper);
+}
+buildFlowchart(simSteps,'flowchartArea');
+
+// ===== SIMULASI =====
+const EXPERIMENTS=[
+  {name:'Pelarutan NaOH',reagents:['NaOH','H₂O'],type:'exo',tAwal:25,tAkhir:68,color:'rgba(254,202,202,0.7)',colorHot:'rgba(220,38,38,0.55)',bubbles:false,desc:'NaOH bersifat higroskopis dan melepaskan kalor besar saat larut dalam air. Larutan menjadi panas karena energi hidrasi ion Na⁺ dan OH⁻ sangat besar.',reaction:'NaOH(s) → Na⁺(aq) + OH⁻(aq) + kalor'},
+  {name:'HCl + Mg',reagents:['HCl','Mg'],type:'exo',tAwal:25,tAkhir:55,color:'rgba(254,215,170,0.7)',colorHot:'rgba(249,115,22,0.55)',bubbles:true,desc:'Mg bereaksi dengan HCl menghasilkan MgCl₂, gas H₂, dan panas. Gelembung yang terlihat adalah gas hidrogen (H₂).',reaction:'Mg(s) + 2HCl(aq) → MgCl₂(aq) + H₂(g) + kalor'},
+  {name:'Hidrasi CaO',reagents:['CaO','H₂O'],type:'exo',tAwal:25,tAkhir:85,color:'rgba(253,230,138,0.7)',colorHot:'rgba(245,158,11,0.6)',bubbles:false,desc:'CaO bereaksi hebat dengan air menghasilkan Ca(OH)₂ dan melepaskan kalor sangat besar. Suhu dapat mencapai 70-90°C.',reaction:'CaO(s) + H₂O(l) → Ca(OH)₂(s) + kalor'},
+  {name:'Pelarutan Urea',reagents:['Urea','H₂O'],type:'endo',tAwal:25,tAkhir:14,color:'rgba(191,219,254,0.7)',colorCold:'rgba(37,99,235,0.45)',bubbles:false,desc:'Urea menyerap kalor dari lingkungan saat larut dalam air. Larutan terasa dingin karena energi untuk memecah kisi kristal lebih besar dari energi hidrasi.',reaction:'CO(NH₂)₂(s) + H₂O(l) → CO(NH₂)₂(aq) — menyerap kalor'},
+  {name:'Asam Sitrat + NaHCO₃',reagents:['Asam Sitrat','NaHCO₃'],type:'endo',tAwal:25,tAkhir:12,color:'rgba(196,231,253,0.7)',colorCold:'rgba(14,165,233,0.45)',bubbles:true,desc:'Asam sitrat bereaksi dengan soda kue (NaHCO₃) menghasilkan CO₂ (gelembung), air, dan garam. Reaksi ini menyerap kalor dari lingkungan.',reaction:'C₆H₈O₇ + 3NaHCO₃ → Na₃C₆H₅O₇ + 3H₂O + 3CO₂(g) — menyerap kalor'},
+  {name:'Ba(OH)₂ + NH₄Cl',reagents:['Ba(OH)₂','NH₄Cl'],type:'endo',tAwal:25,tAkhir:-8,color:'rgba(224,231,255,0.7)',colorCold:'rgba(79,70,229,0.45)',bubbles:false,desc:'Reaksi Ba(OH)₂·8H₂O dengan NH₄Cl adalah salah satu reaksi endotermik paling kuat. Suhu dapat turun hingga di bawah 0°C, membekukan air di bawah gelas.',reaction:'Ba(OH)₂·8H₂O + 2NH₄Cl → BaCl₂ + 2NH₃(g) + 10H₂O — menyerap kalor sangat besar'}
+];
+
+let currentSim=0,simRunning=false,simResults=[];
+let bubbleInterval=null;
+
+function selectSim(idx){
+  currentSim=idx;
+  document.querySelectorAll('.sim-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  const exp=EXPERIMENTS[idx];
+  document.getElementById('simInfo').innerHTML=`<strong style="color:${exp.type==='exo'?'#991b1b':'#1d4ed8'}">${exp.type==='exo'?'🔥 Eksotermik':'❄️ Endotermik'}</strong><br><em>${exp.reaction}</em><br><br>${exp.desc}`;
+  resetSimScene();
+}
+
+function resetSimScene(){
+  const liq=document.getElementById('simLiquid');const exp=EXPERIMENTS[currentSim];
+  liq.style.background=exp.color;liq.style.height='80px';
+  document.getElementById('simResult').style.display='none';
+  document.getElementById('simTempVal').textContent='-- °C';
+  document.getElementById('simTempVal').style.color='var(--acc)';
+  document.getElementById('simTempBar').style.width='50%';
+  document.getElementById('simTempBar').style.background='#94a3b8';
+  document.getElementById('simBubbles').innerHTML='';
+  clearInterval(bubbleInterval);
+  const reagents=document.getElementById('simReagents');
+  reagents.innerHTML=exp.reagents.map(r=>`<div style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:4px 8px;font-size:11px;font-weight:600;color:#334155;">${r}</div>`).join('<span style="font-size:14px;color:#64748b;padding:2px;">+</span>');
+}
+
+function runSim(){
+  if(simRunning)return;simRunning=true;
+  const exp=EXPERIMENTS[currentSim];
+  const btn=document.getElementById('simStartBtn');btn.disabled=true;btn.textContent='⏳ Bereaksi...';
+
+  // Start bubbles if needed
+  if(exp.bubbles){
+    bubbleInterval=setInterval(()=>{
+      const container=document.getElementById('simBubbles');
+      for(let i=0;i<2;i++){
+        const bubble=document.createElement('div');
+        const size=4+Math.random()*8;const left=10+Math.random()*80;
+        const dur=1+Math.random()*1.5;const delay=Math.random()*0.5;
+        const dx=(Math.random()-0.5)*20;
+        bubble.className='bubble-anim';
+        bubble.style.cssText=`width:${size}px;height:${size}px;left:${left}%;bottom:5px;animation-duration:${dur}s;animation-delay:${delay}s;--dx:${dx}px;`;
+        container.appendChild(bubble);
+        setTimeout(()=>bubble.remove(),(dur+delay+0.5)*1000);
+      }
+    },200);
+  }
+
+  // Animate temperature
+  const isExo=exp.type==='exo';const tStart=exp.tAwal,tEnd=exp.tAkhir;
+  const liq=document.getElementById('simLiquid');
+  const tempVal=document.getElementById('simTempVal'),tempBar=document.getElementById('simTempBar');
+  let elapsed=0;const duration=3000;const interval=50;
+  const anim=setInterval(()=>{
+    elapsed+=interval;const progress=Math.min(1,elapsed/duration);
+    const currentT=tStart+(tEnd-tStart)*progress;
+    tempVal.textContent=currentT.toFixed(1)+' °C';
+    const barPct=Math.max(2,Math.min(98,(currentT/100)*100));
+    tempBar.style.width=barPct+'%';
+    if(isExo){
+      const intensity=progress;
+      liq.style.background=`rgba(${220+Math.round(35*intensity)},${38-Math.round(38*intensity)},${38-Math.round(38*intensity)},${0.5+0.3*intensity})`;
+      tempBar.style.background=`rgb(${220},${Math.round(38*(1-intensity))},${Math.round(38*(1-intensity))})`;
+      tempVal.style.color='#dc2626';
+    } else {
+      const intensity=progress;
+      liq.style.background=`rgba(${37+Math.round(218*(1-intensity))},${99+Math.round(156*(1-intensity))},${235},${0.5+0.3*intensity})`;
+      tempBar.style.background=`rgb(${Math.round(37+218*(1-intensity))},${Math.round(99+156*(1-intensity))},235)`;
+      tempVal.style.color='#2563eb';
+    }
+    if(progress>=1){
+      clearInterval(anim);clearInterval(bubbleInterval);simRunning=false;
+      btn.disabled=false;btn.textContent='▶ Jalankan Reaksi';
+      // Show result
+      const result=document.getElementById('simResult');
+      result.style.display='block';
+      result.style.background=isExo?'rgba(220,38,38,0.15)':'rgba(37,99,235,0.15)';
+      result.style.border=`1px solid ${isExo?'#fecaca':'#bfdbfe'}`;
+      result.style.color=isExo?'#991b1b':'#1e3a8a';
+      result.innerHTML=isExo?`🔥 EKSOTERMIK · ΔH &lt; 0 · ΔT = +${(tEnd-tStart).toFixed(1)}°C`:`❄️ ENDOTERMIK · ΔH &gt; 0 · ΔT = ${(tEnd-tStart).toFixed(1)}°C`;
+      // Update table
+      if(!simResults.find(r=>r.idx===currentSim)){
+        simResults.push({idx:currentSim,tA:tStart,tZ:tEnd,type:exp.type,name:exp.name});
+        renderSimTable();
+      }
+    }
+  },interval);
+}
+
+function renderSimTable(){
+  const tb=document.getElementById('simTableBody');tb.innerHTML='';
+  simResults.sort((a,b)=>a.idx-b.idx).forEach(r=>{
+    const dt=r.tZ-r.tA;const isExo=r.type==='exo';
+    tb.innerHTML+=`<tr style="border-bottom:1px solid #f1f5f9;">
+      <td style="padding:3px 7px;font-weight:600;font-size:10px;">${r.name}</td>
+      <td style="padding:3px 7px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;">${r.tA}°C</td>
+      <td style="padding:3px 7px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:${isExo?'#dc2626':'#2563eb'};font-weight:700;">${r.tZ}°C</td>
+      <td style="padding:3px 7px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:${isExo?'#dc2626':'#2563eb'};font-weight:700;">${dt>0?'+':''}${dt.toFixed(1)}°C</td>
+      <td style="padding:3px 7px;text-align:center;font-size:10px;"><span style="background:${isExo?'#fee2e2':'#eff6ff'};color:${isExo?'#991b1b':'#1e3a8a'};padding:1px 6px;border-radius:4px;font-weight:700;">${isExo?'🔥 Eksotermik':'❄️ Endotermik'}</span></td>
+    </tr>`;
+  });
+}
+
+function resetSim(){currentSim=0;simResults=[];simRunning=false;clearInterval(bubbleInterval);selectSim(0);renderSimTable();}
+
+// Initialize
+selectSim(0);
+
+// ===== DISKUSI =====
+const dqStorage={};
+function saveDQ(n,val){dqStorage[n]=val;}
+function clearDQ(){Object.keys(dqStorage).forEach(k=>delete dqStorage[k]);document.querySelectorAll('.disc-area').forEach(ta=>ta.value='');}
+</script>
+</body>
+</html>
